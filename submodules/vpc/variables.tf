@@ -1,13 +1,13 @@
-variable "cidr_block" {
+variable "vpc_id" {
   type        = string
-  description = "CIDR block for SageMaker VPC"
-  default     = "10.0.0.0/23"
+  description = "Selected VPC, VPC ID"
+  default     = "vpc-07afe5e5632b9cd52" # frankfort: "vpc-0c3ef762c330374a9"
 }
 
 variable "private_subnet_cidrs" {
   type        = list(string)
   description = "Private Subnet CIDR values"
-  default     = ["10.0.1.0/25", "10.0.1.128/25"]
+  default     = ["10.10.0.128/25", "10.10.1.0/25"] # 3rd["10.10.1.128/25"]
 }
 
 variable "azs" {

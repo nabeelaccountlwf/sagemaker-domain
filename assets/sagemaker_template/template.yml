@@ -1,0 +1,82 @@
+Description: Toolchain template which provides the resources needed to represent infrastructure as code. The template creates a CI/CD pipeline using GitHub Actions to build a model using a SageMaker Pipeline and deploy the resulting trained ML Model to Model Registry.
+
+Parameters:
+  SageMakerProjectName:
+    Type: String
+    Description: Name of the project
+    NoEcho: true
+    MinLength: 1
+    MaxLength: 32
+    AllowedPattern: ^[a-zA-Z](-*[a-zA-Z0-9])*
+
+  SageMakerProjectId:
+    Type: String
+    NoEcho: true
+    Description: Service generated ID of the project.
+
+  CodeRepositoryName:
+    Type: String
+    MaxLength: 1024
+    Description: Repository name of the Model Building, Training and Deployment in GitHub
+
+  GitHubRepositoryOwnerName:
+    Type: String
+    MaxLength: 1024
+    Description: GitHub Repository Owner Name
+
+  CodestarConnectionUniqueId:
+    Type: String
+    MaxLength: 1024
+    Description: Codestar connection unique identifier
+
+  GitHubTokenSecretName:
+    Type: String
+    MaxLength: 1024
+    Description: Name of GitHub Token in AWS Secret Manager. This is to call deploy github workflow.
+
+  GitHubWorkflowNameForDeployment:
+    Type: String
+    MaxLength: 1024
+    Description: GitHub workflow file name which runs the deployment steps.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Code Repository Info"
+        Parameters:
+          - GitHubRepositoryOwnerName
+          - CodeRepositoryName
+          - CodestarConnectionUniqueId
+          - GitHubTokenSecretName
+          - GitHubWorkflowNameForDeployment
+
+    ParameterLabels:
+      GitHubRepositoryOwnerName:
+        default: "GitHub Repository Owner Name (username or organization)"
+      CodeRepositoryName:
+        default: "GitHub Repository Name"
+      CodestarConnectionUniqueId:
+        default: "Codestar connection unique id"
+      GitHubTokenSecretName:
+        default: "Name of the secret in the Secrets Manager which stores GitHub token"
+      GitHubWorkflowNameForDeployment:
+        default: "GitHub workflow file for deployment. e.g. deploy.yml"
+
+Resources:
+  #-----------------------------------------------------------------------------
+  # SageMaker CodeRepository
+  #-----------------------------------------------------------------------------
+  SagemakerCodeRepository:
+    Type: 'AWS::SageMaker::CodeRepository'
+    Properties:
+      CodeRepositoryName: !Sub ML-models-${SageMakerProjectId}
+      GitConfig:
+        Branch: main
+        RepositoryUrl: !Sub https://codestar-connections.${AWS::Region}.amazonaws.com/git-http/${AWS::AccountId}/${AWS::Region}/${CodestarConnectionUniqueId}/${GitHubRepositoryOwnerName}/${CodeRepositoryName}.git
+      Tags:
+        - Key: "sagemaker:project-id"
+          Value: !Sub ${SageMakerProjectId}
+        - Key: "sagemaker:project-name"
+          Value: !Sub ${SageMakerProjectName}

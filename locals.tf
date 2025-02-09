@@ -1,7 +1,6 @@
 locals {
   vpc = {
-    cidr_block           = "10.0.0.0/23"
-    private_subnet_cidrs = ["10.0.1.0/25", "10.0.1.128/25"]
+    private_subnet_cidrs = ["10.10.1.0/25", "10.10.128.0/25"]
     availability_zones   = ["eu-west-2a", "eu-west-2b"]
   }
 
@@ -35,4 +34,5 @@ locals {
   sagemaker_image_arn_prefix = lookup(local.sagemaker.image_arn_prefixes, data.aws_region.current.name, "eu-west-2")
 
   sagemaker_image_arn = "${local.sagemaker_image_arn_prefix}/${local.sagemaker.jupyter_image_tag}"
+
 }

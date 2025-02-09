@@ -2,12 +2,8 @@ data "aws_iam_policy" "AmazonSageMakerFullAccess" {
   name = "AmazonSageMakerFullAccess"
 }
 
-data "aws_iam_policy" "AmazonSageMakerCanvasFullAccess" {
-  name = "AmazonSageMakerCanvasFullAccess"
-}
-
-data "aws_iam_policy" "AmazonSageMakerCanvasAIServicesAccess" {
-  name = "AmazonSageMakerCanvasAIServicesAccess"
+data "aws_iam_policy" "AmazonS3FullAccess" {
+  name = "AmazonS3FullAccess"
 }
 
 data "aws_iam_policy_document" "sagemaker_domain_assume_role_policy" {
@@ -50,8 +46,7 @@ resource "aws_iam_role" "sagemaker_domain_default_execution_role" {
 
   managed_policy_arns = [
     data.aws_iam_policy.AmazonSageMakerFullAccess.arn,
-    data.aws_iam_policy.AmazonSageMakerCanvasFullAccess.arn,
-    data.aws_iam_policy.AmazonSageMakerCanvasAIServicesAccess.arn,
+    data.aws_iam_policy.AmazonS3FullAccess.arn,
     aws_iam_policy.sagemaker_kms.arn
   ]
 }
