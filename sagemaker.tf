@@ -106,6 +106,7 @@ resource "aws_kms_key_policy" "example" {
 }
 
 
+
 # --------------------------------------------------------------------------------------------
 # Sagemaker Domain IAM permissions
 # --------------------------------------------------------------------------------------------
@@ -128,15 +129,15 @@ module "sagemaker_domain_vpc" {
 # --------------------------------------------------------------------------------------------
 # Auto-shutdown idle notebooks (common for cost control in a domain used for development)
 # --------------------------------------------------------------------------------------------
-module "s3_sagemaker_template" {
-  source  = "./submodules/s3_sagemaker_template"
+module "auto_shutdown_s3_upload" {
+  source  = "./submodules/s3_notebook_auto_shutdown"
   kms_arn = aws_kms_key.sagemaker_efs_kms_key.arn
 }
 
 resource "aws_sagemaker_studio_lifecycle_config" "auto_shutdown" {
   studio_lifecycle_config_name     = "auto-shutdown"
   studio_lifecycle_config_app_type = "JupyterServer"
-  studio_lifecycle_config_content  = base64encode(templatefile("${path.module}/assets/auto_shutdown_template/autoshutdown-script.sh", { tar_file_bucket = module.s3_sagemaker_template.tar_file_bucket, tar_file_id = module.s3_sagemaker_template.tar_file_id }))
+  studio_lifecycle_config_content  = base64encode(templatefile("${path.module}/assets/auto_shutdown_template/autoshutdown-script.sh", { tar_file_bucket = module.auto_shutdown_s3_upload.tar_file_bucket, tar_file_id = module.auto_shutdown_s3_upload.tar_file_id }))
 }
 
 
@@ -229,7 +230,7 @@ resource "aws_servicecatalog_product" "catalog_product" {
     name         = "v1.4"
     description  = "Version 1 of MLOps pipeline"
     type         = "CLOUD_FORMATION_TEMPLATE"
-    template_url = module.s3_sagemaker_template.s3_object_url
+    template_url = module.auto_shutdown_s3_upload.s3_object_url
   }
 
   tags = {
